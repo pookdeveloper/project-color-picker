@@ -1,0 +1,231 @@
+{
+  "name": "project-color-picker",
+  "displayName": "Project Color Picker",
+  "description": "Change the look of the current project (status bar, title bar, etc.) with a color picker.",
+  "version": "0.1.0",
+  "publisher": "pookdeveloper",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pookdeveloper/project-color-picker.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Themes",
+    "Other"
+  ],
+  "keywords": [
+    "color",
+    "workspace",
+    "project",
+    "status bar",
+    "title bar",
+    "color picker"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "projectColor.pick",
+        "title": "Pick project color (color picker)",
+        "category": "Project Color",
+        "icon": "$(symbol-color)"
+      },
+      {
+        "command": "projectColor.setHex",
+        "title": "Set project color (hex)",
+        "category": "Project Color"
+      },
+      {
+        "command": "projectColor.preset",
+        "title": "Choose color from palette",
+        "category": "Project Color"
+      },
+      {
+        "command": "projectColor.reset",
+        "title": "Remove project color",
+        "category": "Project Color"
+      },
+      {
+        "command": "projectColor.openSettings",
+        "title": "Configure affected elements",
+        "category": "Project Color"
+      }
+    ],
+    "configuration": {
+      "title": "Project Color Picker",
+      "properties": {
+        "projectColor.color": {
+          "type": "string",
+          "default": "",
+          "pattern": "^(#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6})?$",
+          "patternErrorMessage": "Use a hex color, e.g. #d4af37",
+          "markdownDescription": "Current project color (hex). Managed by the extension, but you can edit it by hand in the *workspace* settings."
+        },
+        "projectColor.enabledGroups": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true,
+          "default": [
+            "statusBar",
+            "titleBar"
+          ],
+          "markdownDescription": "UI element groups that receive the project color. They must exist in `#projectColor.groups#`. Built in: `statusBar`, `titleBar`, `activityBar`, `tabs`, `sideBar`."
+        },
+        "projectColor.groups": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "background": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "workbench.colorCustomizations keys that receive the chosen color as background."
+              },
+              "foreground": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Keys that receive the text color (see projectColor.foreground)."
+              },
+              "mutedForeground": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Keys that receive a dimmed text color (60% opacity)."
+              },
+              "border": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Keys that receive the chosen color as border/accent."
+              }
+            },
+            "additionalProperties": false
+          },
+          "default": {
+            "statusBar": {
+              "background": [
+                "statusBar.background",
+                "statusBar.noFolderBackground",
+                "statusBar.debuggingBackground"
+              ],
+              "foreground": [
+                "statusBar.foreground",
+                "statusBar.noFolderForeground",
+                "statusBar.debuggingForeground"
+              ]
+            },
+            "titleBar": {
+              "background": [
+                "titleBar.activeBackground",
+                "titleBar.inactiveBackground"
+              ],
+              "foreground": [
+                "titleBar.activeForeground",
+                "titleBar.inactiveForeground"
+              ],
+              "border": [
+                "titleBar.border"
+              ]
+            },
+            "activityBar": {
+              "background": [
+                "activityBar.background"
+              ],
+              "foreground": [
+                "activityBar.foreground"
+              ],
+              "mutedForeground": [
+                "activityBar.inactiveForeground"
+              ],
+              "border": [
+                "activityBar.border"
+              ]
+            },
+            "tabs": {
+              "border": [
+                "tab.activeBorderTop"
+              ]
+            },
+            "sideBar": {
+              "background": [
+                "sideBar.background"
+              ],
+              "foreground": [
+                "sideBar.foreground"
+              ],
+              "border": [
+                "sideBar.border"
+              ]
+            }
+          },
+          "markdownDescription": "Defines which `workbench.colorCustomizations` keys belong to each group and which role they get (`background`, `foreground`, `mutedForeground`, `border`). You can add your own groups or redefine existing ones (merged by group name with the defaults)."
+        },
+        "projectColor.foreground": {
+          "type": "string",
+          "default": "auto",
+          "markdownDescription": "Text color on top of the chosen color. `auto` picks white or black by contrast (WCAG); or set a fixed hex, e.g. `#000000`."
+        },
+        "projectColor.extraSettings": {
+          "type": "object",
+          "default": {},
+          "markdownDescription": "Extra settings written to the workspace when a color is applied and removed when it is cleared. Example: `{ \"workbench.statusBar.visible\": true }`."
+        },
+        "projectColor.presets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$"
+          },
+          "default": [
+            "#d4af37",
+            "#e53935",
+            "#fb8c00",
+            "#43a047",
+            "#00897b",
+            "#1e88e5",
+            "#5e35b1",
+            "#d81b60",
+            "#546e7a"
+          ],
+          "description": "Quick colors shown in the picker and in the palette."
+        },
+        "projectColor.livePreview": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Applies the color live while you choose it. If you close the panel without pressing **Apply**, the previous color is restored."
+        },
+        "projectColor.showStatusBarItem": {
+          "type": "boolean",
+          "default": true,
+          "description": "Shows a status bar button that opens the color picker."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "npm run compile && node test/model.test.js",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.0.0",
+    "typescript": "^5.5.0"
+  }
+}
