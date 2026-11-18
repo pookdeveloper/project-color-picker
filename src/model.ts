@@ -3,6 +3,7 @@ import { normalizeHex, readableForeground, withAlpha } from './colors';
 /** Color roles a workbench.colorCustomizations key can receive. */
 export interface GroupDef {
   background?: string[];
+  mutedBackground?: string[];
   foreground?: string[];
   mutedForeground?: string[];
   border?: string[];
@@ -37,6 +38,9 @@ export function computeColors(
     for (const k of def.background ?? []) {
       out[k] = color;
     }
+    for (const k of def.mutedBackground ?? []) {
+      out[k] = withAlpha(color, '99');
+    }
     for (const k of def.foreground ?? []) {
       out[k] = fg;
     }
@@ -50,11 +54,26 @@ export function computeColors(
   return out;
 }
 
+export interface ColorSources {
+  project?: string;
+  branch?: string;
+  branchColors?: Record<string, string>;
+  remote?: string;
+  remoteColor?: string;
+}
+
+/** The color actually painted: a matching branch rule wins, then the remote color, then the project color. */
+export function effectiveColor(s: ColorSources): string | undefined {
+  const byBranch = s.branch ? normalizeHex(s.branchColors?.[s.branch]) : undefined;
+  const byRemote = s.remote ? normalizeHex(s.remoteColor) : undefined;
+  return byBranch ?? byRemote ?? normalizeHex(s.project);
+}
+
 /** Every key the extension may manage (from all groups, enabled or not). */
 export function managedKeys(groups: Groups): Set<string> {
   const keys = new Set<string>();
   for (const def of Object.values(groups)) {
-    for (const list of [def.background, def.foreground, def.mutedForeground, def.border]) {
+    for (const list of [def.background, def.mutedBackground, def.foreground, def.mutedForeground, def.border]) {
       for (const k of list ?? []) {
         keys.add(k);
       }

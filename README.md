@@ -15,13 +15,19 @@ The panel includes a color picker, a hex field, quick presets and a preview. Wit
 |---|---|---|
 | `projectColor.color` | `""` | Current color (managed by the extension; you can also edit it by hand). |
 | `projectColor.enabledGroups` | `["statusBar","titleBar"]` | Groups that receive the color: `statusBar`, `titleBar`, `activityBar`, `tabs`, `sideBar`, or your own. |
-| `projectColor.groups` | see `package.json` | Which `workbench.colorCustomizations` keys make up each group and their role: `background`, `foreground`, `mutedForeground` (text at 60% opacity), `border`. |
+| `projectColor.groups` | see `package.json` | Which `workbench.colorCustomizations` keys make up each group and their role: `background`, `mutedBackground` (color at 60% opacity, used for the inactive title bar), `foreground`, `mutedForeground` (text at 60% opacity), `border`. |
 | `projectColor.foreground` | `"auto"` | `auto` = white/black by WCAG contrast; or a fixed hex (`#000000`). |
 | `projectColor.extraSettings` | `{}` | Extra workspace settings written when a color is applied and removed when it is cleared. |
 | `projectColor.presets` | 9 colors | Quick palette. |
 | `projectColor.livePreview` | `true` | Apply live from the picker. |
 | `projectColor.showStatusBarItem` | `true` | Status bar button. |
 | `projectColor.autoAssign` | `false` | User-level. Opening a project with no color assigns a preset derived from the project name (always the same one for that name). Removing the color opts that project out. Writes `.vscode/settings.json` in every project you open. |
+| `projectColor.branchColors` | `{}` | Color per Git branch, overriding the project color while that branch is checked out, e.g. `{ "main": "#e53935" }`. Uses the repository of the first folder. |
+| `projectColor.remoteColor` | `""` | Color used when the project is opened remotely (SSH, container, WSL...), overriding the project color. |
+
+### Which color is painted
+
+A matching `branchColors` rule wins, then `remoteColor` (only in remote windows), then the project color. When the window loses focus, the title bar is dimmed so the active window stands out.
 
 ### Example: status bar + title bar with a fixed text color
 

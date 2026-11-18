@@ -87,6 +87,13 @@
                 },
                 "description": "workbench.colorCustomizations keys that receive the chosen color as background."
               },
+              "mutedBackground": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Keys that receive a dimmed version of the chosen color (60% opacity), e.g. inactive window backgrounds."
+              },
               "foreground": {
                 "type": "array",
                 "items": {
@@ -126,11 +133,15 @@
             },
             "titleBar": {
               "background": [
-                "titleBar.activeBackground",
+                "titleBar.activeBackground"
+              ],
+              "mutedBackground": [
                 "titleBar.inactiveBackground"
               ],
               "foreground": [
-                "titleBar.activeForeground",
+                "titleBar.activeForeground"
+              ],
+              "mutedForeground": [
                 "titleBar.inactiveForeground"
               ],
               "border": [
@@ -203,6 +214,22 @@
           "type": "boolean",
           "default": true,
           "markdownDescription": "Applies the color live while you choose it. If you close the panel without pressing **Apply**, the previous color is restored."
+        },
+        "projectColor.branchColors": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$"
+          },
+          "default": {},
+          "markdownDescription": "Color to use while a given Git branch is checked out, overriding the project color. Example: `{ \"main\": \"#e53935\", \"production\": \"#e53935\" }`. Uses the repository of the first folder."
+        },
+        "projectColor.remoteColor": {
+          "type": "string",
+          "default": "",
+          "pattern": "^(#[0-9a-fA-F]{3}|#[0-9a-fA-F]{6})?$",
+          "patternErrorMessage": "Use a hex color, e.g. #546e7a",
+          "markdownDescription": "Color to use when the project is opened remotely (SSH, container, WSL...), overriding the project color. A matching `#projectColor.branchColors#` rule still wins. Empty = disabled."
         },
         "projectColor.autoAssign": {
           "type": "boolean",

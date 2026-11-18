@@ -1,6 +1,6 @@
 const assert = require('assert');
 const { normalizeHex, readableForeground, pickPreset } = require('../out/colors');
-const { computeColors, managedKeys, withoutKeys } = require('../out/model');
+const { computeColors, effectiveColor, managedKeys, withoutKeys } = require('../out/model');
 const pkg = require('../package.json');
 
 const groups = pkg.contributes.configuration.properties['projectColor.groups'].default;
@@ -25,9 +25,9 @@ assert.deepStrictEqual(out, {
   'statusBar.noFolderForeground': '#000000',
   'statusBar.debuggingForeground': '#000000',
   'titleBar.activeBackground': '#d4af37',
-  'titleBar.inactiveBackground': '#d4af37',
+  'titleBar.inactiveBackground': '#d4af3799',
   'titleBar.activeForeground': '#000000',
-  'titleBar.inactiveForeground': '#000000',
+  'titleBar.inactiveForeground': '#00000099',
   'titleBar.border': '#d4af37'
 });
 
@@ -52,5 +52,14 @@ assert.ok(presets.includes(picked));
 assert.strictEqual(pickPreset('my-api', presets), picked);
 assert.ok(new Set(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'].map((n) => pickPreset(n, presets))).size > 1);
 assert.strictEqual(pickPreset('my-api', []), undefined);
+
+// effectiveColor: branch rule > remote color > project color
+const rules = { main: '#e53935' };
+assert.strictEqual(effectiveColor({ project: '#1e88e5', branch: 'main', branchColors: rules, remote: 'ssh-remote', remoteColor: '#546e7a' }), '#e53935');
+assert.strictEqual(effectiveColor({ project: '#1e88e5', branch: 'feat/x', branchColors: rules, remote: 'ssh-remote', remoteColor: '#546e7a' }), '#546e7a');
+assert.strictEqual(effectiveColor({ project: '#1e88e5', branch: 'feat/x', branchColors: rules, remoteColor: '#546e7a' }), '#1e88e5');
+assert.strictEqual(effectiveColor({ project: '#1e88e5', branch: 'main', branchColors: { main: 'nope' } }), '#1e88e5');
+assert.strictEqual(effectiveColor({ branch: 'main', branchColors: rules }), '#e53935');
+assert.strictEqual(effectiveColor({}), undefined);
 
 console.log('OK: all tests passed');

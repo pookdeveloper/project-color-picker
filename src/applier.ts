@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
 import { normalizeHex, pickPreset } from './colors';
-import { computeColors, Groups, managedKeys, withoutKeys } from './model';
+import { computeColors, effectiveColor, Groups, managedKeys, withoutKeys } from './model';
 
 const SECTION = 'projectColor';
 const COLORS_KEY = 'workbench.colorCustomizations';
 const EXTRA_KEYS_STATE = 'projectColor.managedExtraKeys';
 const OPTED_OUT_STATE = 'projectColor.optedOut';
+const PAINTED_STATE = 'projectColor.painted';
 const WS = vscode.ConfigurationTarget.Workspace;
 
 export interface Settings {
@@ -18,12 +19,47 @@ export interface Settings {
   livePreview: boolean;
   showStatusBarItem: boolean;
   autoAssign: boolean;
+  branchColors: Record<string, string>;
+  remoteColor: string;
 }
 
 let state: vscode.Memento;
+let branch: string | undefined;
 
 export function init(context: vscode.ExtensionContext): void {
   state = context.workspaceState;
+  watchGitBranch(context).catch(() => undefined); // no Git extension: branch rules simply never match
+}
+
+/* Minimal slice of the built-in Git extension API (vscode.git, API v1). */
+interface GitRepository {
+  state: { HEAD?: { name?: string }; onDidChange: vscode.Event<void> };
+}
+interface GitApi {
+  repositories: GitRepository[];
+  onDidOpenRepository: vscode.Event<GitRepository>;
+}
+
+async function watchGitBranch(context: vscode.ExtensionContext): Promise<void> {
+  const ext = vscode.extensions.getExtension<{ getAPI(version: 1): GitApi }>('vscode.git');
+  if (!ext) {
+    return;
+  }
+  const api = (ext.isActive ? ext.exports : await ext.activate()).getAPI(1);
+  const refresh = () => {
+    // ponytail: first repository only; per-folder branches in multi-root workspaces are not tracked.
+    const next = api.repositories[0]?.state.HEAD?.name;
+    if (next !== branch) {
+      branch = next;
+      syncFromSettings().catch((err) => vscode.window.showErrorMessage(String(err)));
+    }
+  };
+  const watch = (repo: GitRepository) => {
+    context.subscriptions.push(repo.state.onDidChange(refresh));
+    refresh();
+  };
+  api.repositories.forEach(watch);
+  context.subscriptions.push(api.onDidOpenRepository(watch));
 }
 
 export function getSettings(): Settings {
@@ -37,7 +73,9 @@ export function getSettings(): Settings {
     presets: c.get<string[]>('presets', []).map((p) => normalizeHex(p)).filter((p): p is string => !!p),
     livePreview: c.get<boolean>('livePreview', true),
     showStatusBarItem: c.get<boolean>('showStatusBarItem', true),
-    autoAssign: c.get<boolean>('autoAssign', false)
+    autoAssign: c.get<boolean>('autoAssign', false),
+    branchColors: c.get<Record<string, string>>('branchColors', {}),
+    remoteColor: c.get<string>('remoteColor', '')
   };
 }
 
@@ -96,9 +134,22 @@ async function writeExtras(apply: boolean): Promise<void> {
   await state.update(EXTRA_KEYS_STATE, Object.keys(wanted));
 }
 
-async function doApply(color: string): Promise<void> {
+/** Paints the effective color (branch rule > remote color > project color), or clears everything if there is none. */
+async function applyEffective(): Promise<void> {
+  const s = getSettings();
+  const color = effectiveColor({
+    project: s.color,
+    branch,
+    branchColors: s.branchColors,
+    remote: vscode.env.remoteName,
+    remoteColor: s.remoteColor
+  });
+  if (!color && !state.get<boolean>(PAINTED_STATE, false)) {
+    return; // never painted here: leave hand-written colors alone
+  }
   await writeColors(color);
-  await writeExtras(true);
+  await writeExtras(!!color);
+  await state.update(PAINTED_STATE, !!color);
 }
 
 function assertWorkspace(): void {
@@ -119,19 +170,15 @@ export function setColor(hex: string): Promise<void> {
     if (normalizeHex(cfg.get<string>('color', '')) !== color) {
       await cfg.update('color', color, WS);
     }
-    await doApply(color);
+    await applyEffective();
   });
 }
 
 /** Re-applies the stored color (e.g. after groups change in settings). */
 export function syncFromSettings(): Promise<void> {
   return enqueue(async () => {
-    if (!hasWorkspace()) {
-      return;
-    }
-    const color = getSettings().color;
-    if (color) {
-      await doApply(color);
+    if (hasWorkspace()) {
+      await applyEffective();
     }
   });
 }
@@ -142,6 +189,7 @@ export function resetColor(): Promise<void> {
     assertWorkspace();
     await writeColors(undefined);
     await writeExtras(false);
+    await state.update(PAINTED_STATE, false);
     await vscode.workspace.getConfiguration(SECTION).update('color', undefined, WS);
   });
 }
