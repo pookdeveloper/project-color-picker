@@ -85,10 +85,12 @@ Groups are merged by name with the built-in ones.
 npm install
 npm test            # compiles and runs the color-logic tests
 npm run package     # builds the .vsix
-code --install-extension project-color-picker-0.1.0.vsix
+code --install-extension project-color-picker-X.Y.Z.vsix
 ```
 
 To debug, open the folder in VS Code and press **F5** (Extension Development Host).
+
+To publish a new version, see [RELEASING.md](RELEASING.md).
 
 ## License
 

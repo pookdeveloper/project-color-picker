@@ -11,3 +11,4 @@ graft/**
 .ignore
 GLOSSARY.md
 *.vsix
+RELEASING.md
