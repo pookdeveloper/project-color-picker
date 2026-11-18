@@ -49,29 +49,34 @@ export function activate(context: vscode.ExtensionContext): void {
       }
     }),
 
-    vscode.commands.registerCommand('projectColor.preset', async () => {
-      if (!requireWorkspace()) {
-        return;
-      }
-      const presets = getSettings().presets;
-      const picked = await vscode.window.showQuickPick(
-        presets.map((p) => ({ label: `$(circle-filled) ${p}`, description: undefined, hex: p })),
-        { title: 'Project color', placeHolder: 'Choose a color from the palette' }
-      );
-      if (picked) {
-        await setColor(picked.hex).catch(report);
-      }
-    }),
-
     vscode.commands.registerCommand('projectColor.reset', async () => {
       if (requireWorkspace()) {
         await resetColor().catch(report);
       }
     }),
 
-    vscode.commands.registerCommand('projectColor.openSettings', () =>
-      vscode.commands.executeCommand('workbench.action.openSettings', 'projectColor')
-    ),
+    vscode.commands.registerCommand('projectColor.openSettings', async () => {
+      if (!requireWorkspace()) {
+        return;
+      }
+      try {
+        const settings = getSettings();
+        const picked = await vscode.window.showQuickPick(
+          Object.keys(settings.groups).map((name) => ({
+            label: name,
+            picked: settings.enabledGroups.includes(name)
+          })),
+          { title: 'Configure affected elements', placeHolder: 'Select the groups that receive the project color', canPickMany: true }
+        );
+        if (picked !== undefined) {
+          await vscode.workspace.getConfiguration('projectColor').update(
+            'enabledGroups', picked.map((group) => group.label), vscode.ConfigurationTarget.Workspace
+          );
+        }
+      } catch (err) {
+        report(err);
+      }
+    }),
 
     // Any change to projectColor.* (groups, foreground, hand-edited color...) is re-applied.
     vscode.workspace.onDidChangeConfiguration((e) => {

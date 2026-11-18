@@ -42,11 +42,6 @@
         "category": "Project Color"
       },
       {
-        "command": "projectColor.preset",
-        "title": "Choose color from palette",
-        "category": "Project Color"
-      },
-      {
         "command": "projectColor.reset",
         "title": "Remove project color",
         "category": "Project Color"
@@ -201,7 +196,7 @@
             "#d81b60",
             "#546e7a"
           ],
-          "description": "Quick colors shown in the picker and in the palette."
+          "description": "Quick colors shown in the color picker."
         },
         "projectColor.livePreview": {
           "type": "boolean",
@@ -217,9 +212,10 @@
     }
   },
   "scripts": {
+    "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "test": "npm run compile && node test/model.test.js",
+    "test": "npm run compile && node test/model.test.js && node test/affected-elements.test.js",
     "package": "vsce package"
   },
   "devDependencies": {

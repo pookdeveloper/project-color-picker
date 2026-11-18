@@ -5,7 +5,7 @@ Change the look of the **current project** (status bar, title bar, etc.) with a 
 ## Usage
 
 - Click the paint-palette button in the status bar, or press `Ctrl/Cmd+Shift+P` → **Project Color: Pick project color (color picker)**.
-- Other commands: *Set project color (hex)*, *Choose color from palette*, *Remove project color*, *Configure affected elements*.
+- Other commands: *Set project color (hex)*, *Remove project color*, *Configure affected elements*.
 
 The panel includes a color picker, a hex field, quick presets and a preview. With `projectColor.livePreview` enabled, the color is applied while you choose it; if you close the panel without pressing **Apply**, the previous color is restored.
 

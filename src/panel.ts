@@ -81,7 +81,7 @@ export class ColorPanel {
           vscode.window.setStatusBarMessage('Project color removed', 3000);
           break;
         case 'openSettings':
-          await vscode.commands.executeCommand('workbench.action.openSettings', 'projectColor');
+          await vscode.commands.executeCommand('projectColor.openSettings');
           break;
       }
     } catch (err) {
