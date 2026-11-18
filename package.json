@@ -2,7 +2,7 @@
   "name": "project-color-picker",
   "displayName": "Project Color Picker",
   "description": "Change the look of the current project (status bar, title bar, etc.) with a color picker.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "pookdeveloper",
   "icon": "images/icon.png",
   "repository": {
