@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0
 
 - New `projectColor.branchColors` setting: a color per Git branch (e.g. red on `main`) that overrides the project color while that branch is checked out.
 - New `projectColor.remoteColor` setting: a color for remote windows (SSH, containers, WSL) that overrides the project color.
