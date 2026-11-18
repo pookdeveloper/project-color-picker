@@ -4,6 +4,7 @@
   "description": "Change the look of the current project (status bar, title bar, etc.) with a color picker.",
   "version": "0.1.0",
   "publisher": "pookdeveloper",
+  "icon": "images/icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/pookdeveloper/project-color-picker.git"
