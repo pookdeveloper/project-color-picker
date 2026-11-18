@@ -4,3 +4,10 @@ tsconfig.json
 node_modules/**
 **/*.map
 .gitignore
+.claude/**
+.atl/**
+.codegraph/**
+graft/**
+.ignore
+GLOSSARY.md
+*.vsix
