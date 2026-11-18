@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { normalizeHex, readableForeground } = require('../out/colors');
+const { normalizeHex, readableForeground, pickPreset } = require('../out/colors');
 const { computeColors, managedKeys, withoutKeys } = require('../out/model');
 const pkg = require('../package.json');
 
@@ -44,5 +44,13 @@ const keys = managedKeys(groups);
 assert.ok(keys.has('tab.activeBorderTop') && keys.has('sideBar.border'));
 const cleaned = withoutKeys({ 'statusBar.background': '#000', 'editor.background': '#111' }, keys);
 assert.deepStrictEqual(cleaned, { 'editor.background': '#111' });
+
+// pickPreset: stable per project name, always one of the presets
+const presets = pkg.contributes.configuration.properties['projectColor.presets'].default;
+const picked = pickPreset('my-api', presets);
+assert.ok(presets.includes(picked));
+assert.strictEqual(pickPreset('my-api', presets), picked);
+assert.ok(new Set(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'].map((n) => pickPreset(n, presets))).size > 1);
+assert.strictEqual(pickPreset('my-api', []), undefined);
 
 console.log('OK: all tests passed');

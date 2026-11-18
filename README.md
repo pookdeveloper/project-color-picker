@@ -21,6 +21,7 @@ The panel includes a color picker, a hex field, quick presets and a preview. Wit
 | `projectColor.presets` | 9 colors | Quick palette. |
 | `projectColor.livePreview` | `true` | Apply live from the picker. |
 | `projectColor.showStatusBarItem` | `true` | Status bar button. |
+| `projectColor.autoAssign` | `false` | User-level. Opening a project with no color assigns a preset derived from the project name (always the same one for that name). Removing the color opts that project out. Writes `.vscode/settings.json` in every project you open. |
 
 ### Example: status bar + title bar with a fixed text color
 

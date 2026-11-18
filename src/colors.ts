@@ -43,6 +43,18 @@ export function readableForeground(bg: string): string {
   return contrastRatio(bg, '#ffffff') >= contrastRatio(bg, '#000000') ? '#ffffff' : '#000000';
 }
 
+/** Picks a preset deterministically from a project name (FNV-1a hash). */
+export function pickPreset(name: string, presets: string[]): string | undefined {
+  if (!presets.length) {
+    return undefined;
+  }
+  let h = 0x811c9dc5;
+  for (let i = 0; i < name.length; i++) {
+    h = Math.imul(h ^ name.charCodeAt(i), 0x01000193);
+  }
+  return presets[(h >>> 0) % presets.length];
+}
+
 /** Appends an alpha channel (2-digit hex) to a #rrggbb. */
 export function withAlpha(hex: string, alpha = '99'): string {
   return hex + alpha;

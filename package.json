@@ -203,6 +203,12 @@
           "default": true,
           "markdownDescription": "Applies the color live while you choose it. If you close the panel without pressing **Apply**, the previous color is restored."
         },
+        "projectColor.autoAssign": {
+          "type": "boolean",
+          "default": false,
+          "scope": "application",
+          "markdownDescription": "When opening a project with no color, assign one automatically from `#projectColor.presets#` (the same project name always gets the same color). Projects whose color you removed are left alone. Note: this writes `.vscode/settings.json` in every project you open."
+        },
         "projectColor.showStatusBarItem": {
           "type": "boolean",
           "default": true,

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { getSettings, resetColor, setColor } from './applier';
+import { getSettings, removeColor, resetColor, setColor } from './applier';
 import { normalizeHex } from './colors';
 
 type FromWebview =
@@ -75,7 +75,7 @@ export class ColorPanel {
           break;
         }
         case 'reset':
-          await resetColor();
+          await removeColor();
           this.saved = undefined;
           this.dirty = false;
           vscode.window.setStatusBarMessage('Project color removed', 3000);

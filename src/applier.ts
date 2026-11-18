@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
-import { normalizeHex } from './colors';
+import { normalizeHex, pickPreset } from './colors';
 import { computeColors, Groups, managedKeys, withoutKeys } from './model';
 
 const SECTION = 'projectColor';
 const COLORS_KEY = 'workbench.colorCustomizations';
 const EXTRA_KEYS_STATE = 'projectColor.managedExtraKeys';
+const OPTED_OUT_STATE = 'projectColor.optedOut';
 const WS = vscode.ConfigurationTarget.Workspace;
 
 export interface Settings {
@@ -16,6 +17,7 @@ export interface Settings {
   presets: string[];
   livePreview: boolean;
   showStatusBarItem: boolean;
+  autoAssign: boolean;
 }
 
 let state: vscode.Memento;
@@ -34,7 +36,8 @@ export function getSettings(): Settings {
     extraSettings: c.get<Record<string, unknown>>('extraSettings', {}),
     presets: c.get<string[]>('presets', []).map((p) => normalizeHex(p)).filter((p): p is string => !!p),
     livePreview: c.get<boolean>('livePreview', true),
-    showStatusBarItem: c.get<boolean>('showStatusBarItem', true)
+    showStatusBarItem: c.get<boolean>('showStatusBarItem', true),
+    autoAssign: c.get<boolean>('autoAssign', false)
   };
 }
 
@@ -141,4 +144,23 @@ export function resetColor(): Promise<void> {
     await writeExtras(false);
     await vscode.workspace.getConfiguration(SECTION).update('color', undefined, WS);
   });
+}
+
+/** Explicit user removal: clears the color and opts the project out of auto-assign. */
+export async function removeColor(): Promise<void> {
+  await resetColor();
+  await state.update(OPTED_OUT_STATE, true);
+}
+
+/** Gives an uncolored, non-opted-out project a preset derived from its name. Returns the color assigned. */
+export async function autoAssign(): Promise<string | undefined> {
+  const s = getSettings();
+  if (!s.autoAssign || !hasWorkspace() || s.color || state.get<boolean>(OPTED_OUT_STATE, false)) {
+    return undefined;
+  }
+  const color = pickPreset(vscode.workspace.name ?? '', s.presets);
+  if (color) {
+    await setColor(color);
+  }
+  return color;
 }

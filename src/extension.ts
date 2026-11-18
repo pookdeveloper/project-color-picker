@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { getSettings, hasWorkspace, init, resetColor, setColor, syncFromSettings } from './applier';
+import { autoAssign, getSettings, hasWorkspace, init, removeColor, setColor, syncFromSettings } from './applier';
 import { normalizeHex } from './colors';
 import { ColorPanel } from './panel';
 
@@ -51,7 +51,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
     vscode.commands.registerCommand('projectColor.reset', async () => {
       if (requireWorkspace()) {
-        await resetColor().catch(report);
+        await removeColor().catch(report);
       }
     }),
 
@@ -88,7 +88,20 @@ export function activate(context: vscode.ExtensionContext): void {
   );
 
   // On startup, make sure the colors match the current configuration.
-  syncFromSettings().catch(report);
+  syncFromSettings()
+    .then(autoAssign)
+    .then(async (color) => {
+      if (!color) {
+        return;
+      }
+      const action = await vscode.window.showInformationMessage(`Project color assigned: ${color}`, 'Change', 'Remove');
+      if (action === 'Change') {
+        ColorPanel.show();
+      } else if (action === 'Remove') {
+        await removeColor();
+      }
+    })
+    .catch(report);
 }
 
 export function deactivate(): void {
